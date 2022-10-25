@@ -1,7 +1,7 @@
 # set this to false to disable sonars in firmware
 CC=avr-gcc
 AS=avr-gcc
-INCLUDE_DIRS=-I. -I../avr_common
+INCLUDE_DIRS=-I. -I./avr_common
 CC_OPTS=-Wall --std=gnu99 -DF_CPU=16000000UL -O3 -funsigned-char -mmcu=atmega2560 $(INCLUDE_DIRS)  -D__AVR_3_BYTE_PC__
 AS_OPTS=-x assembler-with-cpp $(CC_OPTS)
 
@@ -15,7 +15,7 @@ AVRDUDE_FLAGS = -p m2560 -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) -b 115200
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
-AVRDUDE_FLAGS += -D -q -V -C /usr/share/arduino/hardware/tools/avr/../avrdude.conf
+AVRDUDE_FLAGS += -D -q -V -C /usr/share/arduino/hardware/archlinux-arduino/avr/bootloaders/gemma/avrdude.conf
 AVRDUDE_FLAGS += -c wiring
 
 .phony:	clean all
