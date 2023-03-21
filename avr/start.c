@@ -2,22 +2,40 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <avr/io.h>
+#include <avr/interrupt.h>
 
-#define BAUD 19600
-#define MYUBRR (F_CPU/16/BAUD-1)
+#include "./avr_common/uart.h" // this includes the printf and initializes it
 
-
-#define MAX_BUF 256
-int main(void){
-  UART_init();
-  UART_putString((uint8_t*)"write something, i'll repeat it\n");
-  uint8_t buf[MAX_BUF];
-  while(1) {
-    UART_getString(buf);
-    UART_putString((uint8_t*)"received\n");
-    UART_putString(buf);
-  }
-
+#define MASK 0xFF //11111111
+volatile uint8_t mss = 0;
+volatile uint8_t new_keys = 0;
+volatile uint8_t old_keys = 0;
+ISR(PCINT2_vect){
+  old_keys = new_keys;
+  new_keys = PINK & MASK;
+  mss = old_keys ^ new_keys; //1 c'è stato un cambiamento da riportare 0 tutto ok
 }
 
- 
+int main(void){
+
+  //setup arduino server
+  printf_init();
+  DDRK &= ~MASK;//and bab per modificare solo i bit della maschera 00000000 0 input,1 output
+  PORTK |= MASK;//pull-up dei pin in input per metterli a 5v 11111111
+  
+  PCICR |= (1<<PCIE2); //set interrupt on change, looking up PCMSK2
+  SREG |= (1<<7);
+
+  PCMSK2 |= MASK;
+  while(1){
+    _delay_ms(200);
+    //mss = PINK & MASK;
+    if(mss){
+      printf("keys changed: %x\n", mss);
+      mss=0;
+    }else{
+      printf("keys status: %x\n", new_keys);
+    }
+  }
+  
+}
