@@ -18,10 +18,14 @@
 #include <getopt.h>
 #include <ncurses.h>
 
+int rows = 1;
+
+WINDOW* win;
 long durations[7] = {0,0,0,0,0,0,0};
 char* thenoteUS[] = {" C", " D", " E", " F", " G", " A", " B"};
 char* thenoteEU[] = {" DO", " RE", " MI", " FA", "SOL", " LA", " SI"};
 int noteFreq4[] = {262, 294, 330, 349, 392, 440, 494};
+
 void* playNote(void *var_arg){
 	beep();
 	return NULL;
@@ -29,28 +33,28 @@ void* playNote(void *var_arg){
 
 void printN(uint8_t notes, uint8_t conv){
 	uint8_t n = notes;
-	//printf("%x\n", n);
-	move(5,0);
-	printw("                 ");
+	mvwprintw(win, rows, 1,"                                   ");
 	for(int i = 0; i < 7; i++){
 		if(n%2==0){
 			if(conv==48){
-				mvprintw(5,5*i,"%s| ", thenoteEU[i]);
+				mvwprintw(win,rows,(6*i)+1,"%s| ", thenoteEU[i]);
 			} else {
-				mvprintw(5,5*i,"%s| ", thenoteUS[i]);
+				mvwprintw(win,rows,(6*i)+1,"%s| ", thenoteUS[i]);
 			}
 			n=n>>1;
 			if(durations[i]==0) durations[i]=clock();
 			//mvprintw(6,i*4,"%ld | ",clock() - durations[i]);
 		} else {
-			mvprintw(5,i*5,"  | ");
+			mvwprintw(win,rows,(i*6)+1,"  | ");
 			//mvprintw(6,i*4,"  |");
 			n=n>>1;
 			durations[i]=0;
+			
 		}
 		
 	}
-	refresh();
+	wrefresh(win);
+	
 }
 
 uint8_t atoh(unsigned char c1, unsigned char c2){
@@ -68,11 +72,12 @@ uint8_t atoh(unsigned char c1, unsigned char c2){
 	return val;
 }
 
-int openCom(int fd){
-    //Setup serial port
-	printw("Setup serial port ttyACM0...");
-	refresh();
-	struct termios options;
+int openCommu(int fd){
+    
+	mvwprintw(win,rows,1,"Setup serial port ttyACM0...");
+	wrefresh(win);
+
+	struct termios options;//Setup serial port
 	tcgetattr(fd, &options);
 	cfsetispeed(&options, B19200);
 	cfsetospeed(&options, B19200);

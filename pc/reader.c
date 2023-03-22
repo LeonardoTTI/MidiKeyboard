@@ -1,65 +1,80 @@
 #include "processing.c"
 #include <ncurses.h>
 
-
+unsigned char Hb[256];
+int pos = 0;
 
 int main(){
-	printf("\a");
+	int win_cols = system("tput cols");
+	int win_rows = system("tput lines");
 	initscr();
+	cbreak();
+	noecho();
+	win = newwin(win_rows,win_cols,0,0);
+	refresh();
+	int topbottom = '-';
+	int leftright = '|';
+	box(win, (int)leftright, (int)topbottom);
+	wrefresh(win);
+
 	//Hello
-	printw("---------------------------\n");
-	printw("MidiKeyboard by LeonardoTTI\n");	
+	mvwprintw(win,rows++,1,"Hi, this is MidiKeyboard by LeonardoTTI");
+	wrefresh(win);	
+	wtimeout(win, 5000);
+	getch();
+	mvwprintw(win,rows,1,"Opening com on /dev/ttyACM0...");
+	wrefresh(win);
 	sleep(1);
-	//Open communication with arduino	
-	printw("Connessione con /dev/ttyACM0...");
-	system("chmod 777 /dev/ttyACM0");
-	int portName = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_NDELAY);
-	refresh();
+	//system("chmod 777 /dev/ttyACM0 -f");
+	int portName = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_NDELAY);//Open communication with arduino	
 	if(portName==-1){
-		printw(" KO\n");
-		printw("help: cd /dev/ -> sudo chmod 777 ttyACM0 or check cable\n");
-		printw("Goodbye :'C\n");
+		mvwprintw(win, rows++, 33," KO");
+		mvwprintw(win,rows++,1,"help: sudo chmod 777 /dev/ttyACM0 or check cable");
+		mvwprintw(win,rows++,1,"Goodbye, press any key to end");
+		wrefresh(win);
+		getch();
 		endwin();
 		return -1;
 	}
-	printw(" OK\n");
-	int ret = openCom(portName);
+	mvwprintw(win, rows++, 33,"OK");
+	wrefresh(win);
+
+
+
+	int ret = openCommu(portName);
 	if(!ret){
-		printw("KO\n");
-		printw("Goodbye :'C\n");
+		mvwprintw(win, rows++, 30," KO");
+		mvwprintw(win,rows++,1,"Goodbye, press any key to end");
+		wrefresh(win);
+		getch();
 		endwin();
 		return -1;
 	}
-	printw(" OK\n----------------------------\n");
-	printw("EU(0) or US(1) convention?");
-	refresh();
+	mvwprintw(win, rows++, 30,"OK");
+	mvwprintw(win,rows,1,"EU(0) or US(1) convention?");
+	wrefresh(win);
 	int conv = getch();
-	mvprintw(5,0,"Ready                          ");
+	mvprintw(rows++,1,"Press (p)=pause; (q)=quit;                       ");
 	refresh();
-	//printw("%d",conv);
 
-
-
+	int com = 0;
+	timeout(50);
 	//Read 
-	unsigned char Hb[256];
-	int pos = 0;
-	
-	while( pos < 256 ) {
+	while( com!=113 ) {
+		com = getch();
 		if (read(portName, Hb+pos, 1) == 0) continue;
-		//printw("pos: %d, send: %c\n",pos,Hb[pos]);
-		refresh();
-		if(pos%2!=0){
-			printN(atoh(Hb[pos-1],Hb[pos]), conv);
-		}
+		//mvwprintw(win, rows, 1,"pos: %d, send: %c\n",pos,Hb[pos]);
+		printN((uint8_t)Hb[pos], conv);
 		pos++;
 		if(pos==256){
 			pos=0;
 			memset(Hb, '\0', sizeof(Hb));
 		}
-		int c = getch();
 	}
+	printw(" ");
+	wrefresh(win);
+	//Close communication and free win;
 	endwin();
-	//Close communication
 	close(portName);
 	
 	printf("Goodbye World\n");
