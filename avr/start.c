@@ -28,14 +28,15 @@ int main(void){
 
   PCMSK2 |= MASK;
   while(1){
-    _delay_ms(200);
+    _delay_ms(10);
     //mss = PINK & MASK;
     if(mss){
-      printf("keys changed: %x\n", mss);
+      printf("%x", new_keys);//STAMPARE HEX IN MINUSCOLO
       mss=0;
-    }else{
-      printf("keys status: %x\n", new_keys);
-    }
+    }//else{
+      //printf("keys status: ");
+      //printf("%x\n", new_keys);
+    //}
   }
   
 }
