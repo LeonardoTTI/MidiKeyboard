@@ -25,7 +25,9 @@ int main(){
 	mvwprintw(win,rows,1,"Opening com on /dev/ttyACM0...");
 	wrefresh(win);
 	sleep(1);
-	//system("chmod 777 /dev/ttyACM0 -f");
+	int ret ;
+	system("sudo chmod 777 /dev/ttyACM0 -f");
+	system("sudo modprobe pcspkr");
 	int portName = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_NDELAY);//Open communication with arduino	
 	if(portName==-1){
 		mvwprintw(win, rows++, 33," KO");
@@ -41,7 +43,7 @@ int main(){
 
 
 
-	int ret = openCommu(portName);
+	ret = openCommu(portName);
 	if(!ret){
 		mvwprintw(win, rows++, 30," KO");
 		mvwprintw(win,rows++,1,"Goodbye, press any key to end");
@@ -50,26 +52,26 @@ int main(){
 		endwin();
 		return -1;
 	}
-	mvwprintw(win, rows++, 30,"OK");
+	mvwprintw(win, rows++, 30,"OK                                     ");
 	mvwprintw(win,rows,1,"EU(0) or US(1) convention?");
 	wrefresh(win);
 	int conv = getch();
-	mvprintw(rows++,1,"Press (p)=pause; (q)=quit;                       ");
-	refresh();
+	mvwprintw(win,rows++,1,"Menu: (p)=pause; (q)=quit; (c)=switch convention           ");
+	//mvwprintw(win,rows,1,"        |        |        |        |        |        |");
+	//mvwprintw(win,rows+1,1,"       0|       0|       0|       0|       0|       0|");
+	wrefresh(win);
 
 	int com = 0;
 	timeout(50);
 	//Read 
 	while( com!=113 ) {
 		com = getch();
+		if(com==99){if(conv==48){conv++;}else{conv--;}}
+		printT();
 		if (read(portName, Hb+pos, 1) == 0) continue;
-		//mvwprintw(win, rows, 1,"pos: %d, send: %c\n",pos,Hb[pos]);
-		printN((uint8_t)Hb[pos], conv);
+		printN((uint8_t)Hb[pos], conv);//mvwprintw(win, rows, 1,"pos: %d, send: %c\n",pos,Hb[pos]);
+		if(pos>=256){pos=0;memset(Hb, '\0', sizeof(Hb));}
 		pos++;
-		if(pos==256){
-			pos=0;
-			memset(Hb, '\0', sizeof(Hb));
-		}
 	}
 	printw(" ");
 	wrefresh(win);
