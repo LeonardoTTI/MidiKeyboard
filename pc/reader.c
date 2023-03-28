@@ -69,8 +69,9 @@ int main(){
 		if(com==99){if(conv==48){conv++;}else{conv--;}}
 		printT();
 		if (read(portName, Hb+pos, 1) == 0) continue;
-		printN((uint8_t)Hb[pos], conv);//mvwprintw(win, rows, 1,"pos: %d, send: %c\n",pos,Hb[pos]);
-		if(pos>=256){pos=0;memset(Hb, '\0', sizeof(Hb));}
+		printN((uint8_t)Hb[pos], conv);
+		mvwprintw(win, rows+2, 1,"buffer position: %d, send: %u\n",pos,Hb[pos]);
+		if(pos>=255){pos=0;memset(Hb, '\0', sizeof(Hb));}
 		pos++;
 	}
 	printw(" ");
