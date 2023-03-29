@@ -25,7 +25,13 @@ WINDOW* win;
 clock_t durations[7] = {0,0,0,0,0,0,0};
 char* thenoteUS[] = {" C", " D", " E", " F", " G", " A", " B"};
 char* thenoteEU[] = {" DO", " RE", " MI", " FA", "SOL", " LA", " SI"};
-int noteFreq4[] = {262, 294, 330, 349, 392, 440, 494};
+char* note[] = {"aplay -q piano-c_C_major.wav", 
+				"aplay -q piano-d_D_major.wav", 
+				"aplay -q piano-e_E_major.wav", 
+				"aplay -q piano-f_F_major.wav", 
+				"aplay -q piano-g_G_major.wav", 
+				"aplay -q piano-a_A_major.wav", 
+				"aplay -q piano-b_B_major.wav"};
 
 void* playNote(void *var_arg){
 	beep();
@@ -40,8 +46,10 @@ void printN(uint8_t notes, uint8_t conv){
 			if(durations[i]==0) durations[i]=clock();
 			if(conv==48){
 				mvwprintw(win,rows,(9*i)+1,"     %s|", thenoteEU[i]);
+				system(note[i]);
 			} else {
 				mvwprintw(win,rows,(9*i)+1,"      %s|", thenoteUS[i]);
+				system(note[i]);
 			}
 			n=n>>1;
 		} else {
