@@ -27,7 +27,6 @@ int main(){
 	sleep(1);
 	int ret ;
 	system("sudo chmod 777 /dev/ttyACM0 -f");
-	system("sudo modprobe pcspkr");
 	int portName = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_NDELAY);//Open communication with arduino	
 	if(portName==-1){
 		mvwprintw(win, rows++, 33," KO");
@@ -56,7 +55,7 @@ int main(){
 	mvwprintw(win,rows,1,"EU(0) or US(1) convention?");
 	wrefresh(win);
 	int conv = getch();
-	mvwprintw(win,rows++,1,"Menu: (p)=pause; (q)=quit; (c)=switch convention           ");
+	mvwprintw(win,rows++,1,"Menu: (q)=quit; (c)=switch convention           ");
 	//mvwprintw(win,rows,1,"        |        |        |        |        |        |");
 	//mvwprintw(win,rows+1,1,"       0|       0|       0|       0|       0|       0|");
 	wrefresh(win);
