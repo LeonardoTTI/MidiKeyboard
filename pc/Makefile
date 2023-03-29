@@ -1,5 +1,5 @@
 CC=gcc
-LINK= -lncurses
+LINK= -lncurses -pthread
 all:
 	$(CC) -o reader reader.c $(LINK)
 clean:	

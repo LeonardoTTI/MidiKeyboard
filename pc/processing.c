@@ -6,7 +6,7 @@
 #include <termios.h> /* POSIX terminal control definitions */
 #include <time.h>
 #include <sys/types.h>
-//gcc -o mainGPT main_gpy.c
+#include <pthread.h>
 #include <stdlib.h> 
 #include <stdint.h>   /* Standard types */
 #include <string.h>   /* String function definitions */
@@ -25,20 +25,21 @@ WINDOW* win;
 clock_t durations[7] = {0,0,0,0,0,0,0};
 char* thenoteUS[] = {" C", " D", " E", " F", " G", " A", " B"};
 char* thenoteEU[] = {" DO", " RE", " MI", " FA", "SOL", " LA", " SI"};
-char* note[] = {"aplay -q piano-c_C_major.wav", 
-				"aplay -q piano-d_D_major.wav", 
-				"aplay -q piano-e_E_major.wav", 
-				"aplay -q piano-f_F_major.wav", 
-				"aplay -q piano-g_G_major.wav", 
-				"aplay -q piano-a_A_major.wav", 
-				"aplay -q piano-b_B_major.wav"};
+char* note[] = {"aplay -q ./notes/piano-c_C_major.wav", 
+				"aplay -q ./notes/piano-d_D_major.wav", 
+				"aplay -q ./notes/piano-e_E_major.wav", 
+				"aplay -q ./notes/piano-f_F_major.wav", 
+				"aplay -q ./notes/piano-g_G_major.wav", 
+				"aplay -q ./notes/piano-a_A_major.wav", 
+				"aplay -q ./notes/piano-b_B_major.wav"};
 
-void* playNote(void *var_arg){
-	beep();
+void *playNote(void *var_arg){
+	system(note[*((int *)var_arg)]);
 	return NULL;
 }
 
-void printN(uint8_t notes, uint8_t conv){
+int printN(uint8_t notes, uint8_t conv){
+	pthread_t thread_id;
 	uint8_t n = notes;
 	mvwprintw(win, rows, 1,"                                   ");
 	for(int i = 0; i < 7; i++){
@@ -46,10 +47,21 @@ void printN(uint8_t notes, uint8_t conv){
 			if(durations[i]==0) durations[i]=clock();
 			if(conv==48){
 				mvwprintw(win,rows,(9*i)+1,"     %s|", thenoteEU[i]);
-				system(note[i]);
+				int press = i;
+				if(pthread_create(&thread_id, NULL, playNote, &press) != 0){
+					mvwprintw(win,rows+3, 1,"Error: failed to play the note %s", thenoteEU[i]);
+					return -1;
+				} else {
+					pthread_detach(thread_id);
+				}
 			} else {
 				mvwprintw(win,rows,(9*i)+1,"      %s|", thenoteUS[i]);
-				system(note[i]);
+				if(pthread_create(&thread_id, NULL, playNote, &i) != 0){
+					mvwprintw(win,rows+3, 1,"Error: failed to play the note %s", thenoteUS[i]);
+					return -1;
+				} else {
+					pthread_detach(thread_id);
+				}
 			}
 			n=n>>1;
 		} else {
@@ -57,7 +69,6 @@ void printN(uint8_t notes, uint8_t conv){
 			mvwprintw(win,rows,(9*i)+1,"        |");
 			n=n>>1;
 		}
-		
 	}
 	wrefresh(win);
 	
