@@ -34,7 +34,7 @@ int main(){
 		mvwprintw(win,rows++,1,"Goodbye, press any key to end");
 		wrefresh(win);
 		getch();
-		endwin();
+		exitFailure();
 		return -1;
 	}
 	mvwprintw(win, rows++, 33,"OK");
@@ -48,7 +48,7 @@ int main(){
 		mvwprintw(win,rows++,1,"Goodbye, press any key to end");
 		wrefresh(win);
 		getch();
-		endwin();
+		exitFailure();
 		return -1;
 	}
 	mvwprintw(win, rows++, 30,"OK                                     ");
@@ -75,11 +75,9 @@ int main(){
 	}
 	printw(" ");
 	wrefresh(win);
-	//Close communication and free win;
-	endwin();
-	close(portName);
-	
-	printf("Goodbye World\n");
 
+	
+	//Close communication and free win;
+	exitClose(portName);
 	return 0;
 }

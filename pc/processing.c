@@ -18,8 +18,8 @@
 #include <getopt.h>
 #include <ncurses.h>
 
-int rows = 1;
-
+int rows = 1, press2, press1;
+pthread_t thread_id[7];
 WINDOW *win;
 clock_t durations[7] = {0, 0, 0, 0, 0, 0, 0};
 char *thenoteUS[] = {" C", " D", " E", " F", " G", " A", " B"};
@@ -34,13 +34,26 @@ char *note[] = {"aplay -q ./notes/piano-c_C_major.wav",
 
 void *playNote(void *var_arg)
 {
-	system(note[*((int *)var_arg)]);
-	return NULL;
+	if(var_arg!=NULL){
+		system(note[*((int *)var_arg)]);
+	}
+	pthread_exit(NULL);
 }
 
+void exitFailure(){
+	endwin();
+	sleep(4);
+	exit_curses(-1);
+}
+void exitClose(int portName){
+	endwin();
+	close(portName);
+	sleep(4);
+	printf("Goodbye World\n");
+	exit_curses(0);
+}
 void printN(uint8_t notes, uint8_t conv)
 {
-	pthread_t thread_id[7];
 	uint8_t n = notes;
 	mvwprintw(win, rows, 1, "                                   ");
 	for (int i = 0; i < 7; i++)
@@ -52,7 +65,7 @@ void printN(uint8_t notes, uint8_t conv)
 				mvwprintw(win, rows, (9 * i) + 1, "     %s|", thenoteEU[i]);
 				if (durations[i] == 0)
 				{
-					int press2 = i;
+					press2 = i;
 					if (pthread_create(&(thread_id[i]), NULL, playNote, &press2) != 0)
 					{
 						mvwprintw(win, rows + 3, 1, "Error: failed to play the note %s", thenoteEU[i]);
@@ -60,7 +73,7 @@ void printN(uint8_t notes, uint8_t conv)
 					}
 					else
 					{
-						pthread_detach(thread_id);
+						pthread_detach(thread_id[i]);
 					}
 				}
 			}
@@ -69,7 +82,7 @@ void printN(uint8_t notes, uint8_t conv)
 				mvwprintw(win, rows, (9 * i) + 1, "      %s|", thenoteUS[i]);
 				if (durations[i] == 0)
 				{
-					int press1 = i;
+					press1 = i;
 					if (pthread_create(&(thread_id[i]), NULL, playNote, &press1) != 0)
 					{
 						mvwprintw(win, rows + 3, 1, "Error: failed to play the note %s", thenoteUS[i]);
@@ -77,7 +90,7 @@ void printN(uint8_t notes, uint8_t conv)
 					}
 					else
 					{
-						pthread_detach(thread_id);
+						pthread_detach(thread_id[i]);
 					}
 				}
 			}
