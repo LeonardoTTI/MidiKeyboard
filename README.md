@@ -1,6 +1,7 @@
 Questo è il primo file di questo progetto.
 Un progetto fatto di musica e di interrupts.
 
+This is an academic project of the Operating System Course held in 2022.
 Midi Keyboard (for musicans) [2]
    Arduino: Implement a simple keyboard that can monitor for each key,
             the time it took to be pressed (need to use a 2 ways swich)
